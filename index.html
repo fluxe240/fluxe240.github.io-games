@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>fluxe — предложить игру/программу</title>
+<title>fluxe — игры и программы</title>
 <meta name="theme-color" content="#07140e">
 <style>
   :root{ --bg:#07140e; --green:#00ff88; --text:#eaf9f1; --muted:#b6e3c8; }
+
   body{
     margin:0; color:var(--text);
     font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -15,16 +16,19 @@
       radial-gradient(1000px 700px at 110% 10%, #0c3a25 0%, var(--bg) 30%),
       var(--bg);
   }
-
   #bg-snow{ position:fixed; inset:0; width:100vw; height:100vh; z-index:0; pointer-events:none; display:block; }
 
-  .wrap{ position:relative; z-index:1; max-width:720px; margin:40px auto; padding:0 16px; }
-  .box{ background: rgba(5,18,12,.8); border:1px solid rgba(0,255,136,.25); border-radius:16px; padding:18px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
+  .fluxe-site{ position:relative; min-height:100vh; overflow:hidden; z-index:1; }
 
-  /* Обновлённый дизайн логотипа fluxe */
-  .header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .header{ position:sticky; top:0; z-index:3; padding:22px;
+    backdrop-filter:blur(10px);
+    background: linear-gradient(180deg, rgba(7,20,14,.7), rgba(7,20,14,.3) 60%, transparent);
+    border-bottom:1px solid rgba(0,255,136,.15);
+  }
+  .header .container{ max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
   .logo{
-    font-weight:900; font-size:24px; letter-spacing:.6px; line-height:1;
+    font-weight:900; font-size:26px; letter-spacing:.6px; line-height:1;
     background: linear-gradient(90deg, #eafff7 0%, #6bffb5 30%, #00ff88 50%, #9fffd8 70%, #eafff7 100%);
     background-size:200% auto;
     -webkit-background-clip:text; background-clip:text; color:transparent;
@@ -37,97 +41,187 @@
     50%{ background-position:100% 50%; filter: drop-shadow(0 0 14px rgba(0,255,136,.6)); }
   }
 
-  .icon-btn{ width:40px; height:40px; border-radius:50%; background: rgba(0,255,136,.12); border:1px solid rgba(0,255,136,.25); box-shadow: 0 0 12px rgba(0,255,136,.35), 0 0 24px rgba(0,255,136,.15); display:inline-flex; align-items:center; justify-content:center; color:var(--green); text-decoration:none; }
-
-  .title{ margin:0 0 14px; font-size:26px; font-weight:900; color:#bfffe1; text-shadow:0 0 12px rgba(0,255,136,.25); }
-  label{ display:block; margin:10px 0 6px; color:#cfeede; font-size:14px; }
-  input[type="text"], input[type="url"]{
-    width:100%; padding:12px 12px; border-radius:12px; border:1px solid rgba(0,255,136,.25);
-    background:rgba(0,255,136,.06); color:#eaf9f1; outline:none;
+  .actions{ display:flex; align-items:center; gap:10px; }
+  .icon-btn{ width:40px; height:40px; border-radius:50%;
+    background: rgba(0,255,136,.12); border:1px solid rgba(0,255,136,.25);
+    box-shadow: 0 0 12px rgba(0,255,136,.35), 0 0 24px rgba(0,255,136,.15);
+    display:inline-flex; align-items:center; justify-content:center; color:var(--green);
+    transition: transform .18s ease, box-shadow .2s ease, filter .2s ease; text-decoration:none; cursor:pointer;
   }
-  .row{ display:grid; gap:10px; }
+  .icon-btn:hover{ transform:scale(1.08); box-shadow:0 0 16px rgba(0,255,136,.8), 0 0 40px rgba(0,255,136,.35); }
+  .icon-btn:focus{ outline:none; box-shadow: 0 0 0 3px rgba(0,255,136,.35), 0 0 0 6px rgba(0,255,136,.2); }
 
-  /* Капча */
-  .captcha{ display:grid; grid-template-columns: 1fr auto; align-items:end; gap:10px; margin-top:6px; }
-  .captcha-box{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; border:1px solid rgba(0,255,136,.25); background:rgba(0,255,136,.06); }
-  .captcha-q{ font-weight:800; color:#bfffe1; letter-spacing:.3px; }
-  .cap-field{ width:120px; }
-  .cap-refresh{ height:40px; border-radius:10px; padding:0 12px; border:1px solid rgba(0,255,136,.25); background:transparent; color:#bfffe1; cursor:pointer; }
+  .hero{ position:relative; z-index:1; max-width:1200px; margin:40px auto 10px; padding:32px 22px 0; text-align:left; }
+  .title{ font-size:clamp(28px, 4vw, 48px); line-height:1.1; margin:0; font-weight:900; letter-spacing:.2px;
+    background: linear-gradient(90deg, #eafff7, #a6ffd7 35%, #eafff7 70%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter: drop-shadow(0 0 12px rgba(0,255,136,.25));
+  }
 
-  .actions{ display:flex; gap:8px; margin-top:14px; }
-  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:44px; padding:0 16px; border-radius:12px;
-    background: linear-gradient(180deg, rgba(0,255,136,.95), rgba(0,230,120,.9)); color:#042d16; font-weight:800; border:none; cursor:pointer; }
-  .btn.secondary{ background: transparent; color:#bfffe1; border:1px solid rgba(0,255,136,.25); }
-  .ok{ padding:12px; border-radius:12px; background:rgba(0,255,136,.12); border:1px solid rgba(0,255,136,.3); color:#bfffe1; margin-top:12px; }
+  .section{ position:relative; z-index:1; max-width:1200px; margin:28px auto 8px; padding:0 22px; }
+  .section-title{
+    margin:22px 0 10px; font-size:22px; font-weight:900; letter-spacing:.4px; color:#cffff0;
+    text-shadow:0 0 10px rgba(0,255,136,.25);
+    display:inline-flex; align-items:center; gap:10px;
+  }
+  .section-title::after{
+    content:""; display:inline-block; width:70px; height:2px;
+    background: linear-gradient(90deg, rgba(0,255,136,.8), rgba(0,255,136,0));
+    border-radius:2px;
+  }
 
-  .reveal{ opacity:0; transform: translateY(12px); transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .6s cubic-bezier(.2,.7,.2,1); }
-  .reveal.in{ opacity:1; transform:none; }
+  .catalog{ position:relative; z-index:1; max-width:1200px; margin:12px auto 46px; padding:0 22px;
+    display:grid; grid-template-columns: repeat(12, 1fr); gap:18px;
+  }
+  .card{ grid-column: span 4; display:flex; flex-direction:column;
+    background: linear-gradient(180deg, rgba(5,18,12,.8), rgba(5,18,12,.6));
+    border:1px solid rgba(0,255,136,.18); border-radius:16px; overflow:hidden;
+    box-shadow:0 8px 24px rgba(0,0,0,.35), 0 0 0 1px rgba(0,255,136,.08) inset;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card:hover{ transform: translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.5), 0 0 30px rgba(0,255,136,.15); border-color: rgba(0,255,136,.35); }
+  .thumb{ position:relative; padding-top:58%; background-size:cover; background-position:center; filter:saturate(110%); }
+  .thumb::after{ content:""; position:absolute; inset:0; background: radial-gradient(60% 80% at 70% 10%, rgba(0,255,136,.18), transparent 60%); mix-blend-mode: screen; }
+  .card-body{ padding:16px; display:grid; gap:12px; }
+  .card-title{ font-size:20px; font-weight:800; margin:0; }
+  .meta{ display:flex; align-items:center; gap:8px; }
+  .badge{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:13px; font-weight:700; letter-spacing:.2px; background: rgba(0,255,136,.08); color:#bfffe1; border:1px solid rgba(0,255,136,.25); text-transform:uppercase; }
+  .badge.offline::before{ content:"•"; color:#ff6a6a; text-shadow: 0 0 8px rgba(255,90,90,.6); }
+
+  .btn{
+    display:inline-flex; justify-content:center; align-items:center; gap:10px; height:46px; padding:0 18px; border-radius:12px;
+    background: linear-gradient(180deg, rgba(0,255,136,.95), rgba(0,230,120,.9)); color:#042d16; font-weight:900; letter-spacing:.3px; text-decoration:none;
+    box-shadow: 0 0 0 2px rgba(0,255,136,.35) inset, 0 0 12px rgba(0,255,136,.7), 0 0 32px rgba(0,255,136,.35);
+    transition: transform .18s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .btn:hover{ transform: scale(1.045); box-shadow: 0 0 0 2px rgba(255,255,255,.55) inset, 0 0 16px rgba(0,255,136,.9), 0 0 44px rgba(0,255,136,.45); filter: brightness(1.03); }
+  .btn:active{ transform: scale(0.995); }
+  .btn:focus{ outline:none; box-shadow: 0 0 0 3px rgba(0,255,136,.35), 0 0 0 6px rgba(0,255,136,.2), 0 0 22px rgba(0,255,136,.7); }
+
+  .footer{ position:relative; z-index:1; color:var(--muted); text-align:center; padding:24px; border-top:1px solid rgba(0,255,136,.12); background: linear-gradient(180deg, rgba(5,18,12,.3), transparent); }
+
+  .reveal{ opacity:0; transform: translateY(14px); transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .6s cubic-bezier(.2,.7,.2,1); will-change:opacity,transform; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  @media (max-width:1024px){ .card{grid-column: span 6;} }
+  @media (max-width:640px){ .header{padding:16px} .hero{padding:24px 16px 0}
+    .section{padding:0 16px} .catalog{padding:0 16px; gap:14px} .card{grid-column:span 12} .btn{width:100%} .icon-btn{width:38px;height:38px}
+  }
+  @media (prefers-reduced-motion: reduce){ *{animation:none!important; transition:none!important} }
 </style>
 </head>
 <body>
 <canvas id="bg-snow" aria-hidden="true"></canvas>
 
-<div class="wrap">
-  <div class="header reveal">
-    <div class="logo">fluxe</div>
-    <a class="icon-btn" href="index.html" aria-label="На главную">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </a>
-  </div>
-
-  <div class="box reveal">
-    <h1 class="title">Подача заявки</h1>
-    <form id="appForm" class="row" autocomplete="off" novalidate>
-      <div>
-        <label for="nick">Ваш ник</label>
-        <input type="text" id="nick" required placeholder="например, pelemeuu">
-      </div>
-      <div>
-        <label for="title">Название игры/программы</label>
-        <input type="text" id="title" required placeholder="например, Buckshot Roulette">
-      </div>
-      <div>
-        <label for="vt">Ссылка на VirusTotal</label>
-        <input type="url" id="vt" required placeholder="https://www.virustotal.com/..." inputmode="url">
-      </div>
-      <div>
-        <label for="link">Ссылка на скачивание</label>
-        <input type="url" id="link" required placeholder="https://..." inputmode="url">
-      </div>
-
-      <!-- Капча -->
-      <div>
-        <label>Подтвердите, что вы не робот</label>
-        <div class="captcha">
-          <div class="captcha-box">
-            <span class="captcha-q" id="capQ">2 + 3 = ?</span>
-            <input class="cap-field" type="text" id="capA" inputmode="numeric" placeholder="Ответ" required>
-          </div>
-          <button type="button" class="cap-refresh" id="capR">Обновить</button>
-        </div>
-      </div>
-
+<div class="fluxe-site" id="fluxe">
+  <header class="header reveal">
+    <div class="container">
+      <div class="logo">fluxe</div>
       <div class="actions">
-        <button class="btn" type="submit">Отправить</button>
-        <button class="btn secondary" type="reset" id="resetBtn">Сброс</button>
+        <!-- Обновлено: ссылка ведёт на новый сайт предложений -->
+        <a class="icon-btn" href="https://fluxe2400.github.io/" target="_blank" rel="noopener noreferrer" aria-label="Предложить игру или программу">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h9"/>
+            <path d="M16 3v6"/><path d="M13 6h6"/>
+          </svg>
+        </a>
       </div>
+    </div>
+  </header>
 
-      <!-- Убрано сообщение про LocalStorage и ID -->
-      <div id="result" class="ok" style="display:none;"></div>
-    </form>
+  <section class="hero">
+    <h1 class="title reveal">Скачивайте игры и программы в один клик</h1>
+  </section>
+
+  <!-- Раздел Игры -->
+  <div class="section">
+    <h2 class="section-title reveal">Игры</h2>
   </div>
+  <section class="catalog" aria-label="Список игр">
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://buckshotroulette.com//data/image/game/buckshot-roulette-feature-image.jpg');"></div>
+      <div class="card-body">
+        <h3 class="card-title">Buckshot Roulette</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/QBQF7Hs7" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://f4.bcbits.com/img/a0084845941_16.jpg');"></div>
+      <div class="card-body">
+        <h3 class="card-title">ULTRAKILL</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/Z2LbFZ5I" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://itorrents-igruha.org/uploads/posts/2023-01/1672795576_cover.jpg');"></div>
+      <div class="card-body">
+        <h3 class="card-title">Hotline Miami</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/Begimb3E" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://i.playground.ru/e/HB-5Xo_DO35lX0_FVIlIHQ.jpeg?600-600');"></div>
+      <div class="card-body">
+        <h3 class="card-title">ленивая принцесса-монстр не хочет работать</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/dz9HjWf0" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+  </section>
+
+  <!-- Раздел Программы -->
+  <div class="section">
+    <h2 class="section-title reveal">Программы</h2>
+  </div>
+  <section class="catalog" aria-label="Список программ">
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://play-lh.googleusercontent.com/MumkEpSL7dj16Rt_JfqgKPmMhaWlBhQN5HD2sxNpCgKhUEiIkfcktW_pllWM3wfKeQ=w240-h480-rw');"></div>
+      <div class="card-body">
+        <h3 class="card-title">Wallpaper Engine</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/6eLkU5oB" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjW67tvI9LKr21QJeNObg14_cKP0T4cWzaTQ&s');"></div>
+      <div class="card-body">
+        <h3 class="card-title">Steam Tools</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/bJpD5QJb" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+
+    <article class="card reveal">
+      <div class="thumb" style="background-image:url('https://images.steamusercontent.com/ugc/27690528766895719/C9F2DBAF5000D1D391A110B374EFFBDA4B6C9099/?imw=200&imh=200&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true');"></div>
+      <div class="card-body">
+        <h3 class="card-title">Soundpad</h3>
+        <div class="meta"><span class="badge offline">Онлайн: нет</span></div>
+        <a class="btn reveal" href="https://gclnk.com/gujcrtn0" target="_blank" rel="noopener nofollow">Скачать</a>
+      </div>
+    </article>
+  </section>
+
+  <footer class="footer reveal">
+    <small>by pelemeuu</small>
+  </footer>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Reveal
   const animated = document.querySelectorAll('.reveal');
   const io = new IntersectionObserver((entries, obs) => {
     entries.forEach(entry => { if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); } });
-  }, { threshold: .1 });
+  }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
   animated.forEach(el => io.observe(el));
+  setTimeout(() => document.querySelectorAll('.hero .reveal').forEach(el => el.classList.add('in')), 80);
 
-  // Снег (HiDPI, ресайз)
   const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!prefersReduce){
     const c = document.getElementById('bg-snow');
@@ -143,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr,dpr);
       adjustFlakes(w,h);
     }
-
     function makeFlake(w,h){ return { x:Math.random()*w, y:Math.random()*h, r:1+Math.random()*2.2, s:.4+Math.random()*1.2, d:Math.random()*1.5 }; }
     function adjustFlakes(w,h){
       const target = Math.floor(w*h*0.00012);
@@ -151,78 +244,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if(flakes.length<target){ for(let i=flakes.length;i<target;i++) flakes.push(makeFlake(w,h)); }
       else if(flakes.length>target){ flakes.length = target; }
     }
-
     function step(){
-      const w = c.clientWidth, h = c.clientHeight;
+      const w=c.clientWidth,h=c.clientHeight;
       ctx.clearRect(0,0,w,h);
-      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      ctx.fillStyle='rgba(255,255,255,.9)';
       for(const f of flakes){
-        f.y += f.s; f.x += Math.sin((f.y+f.d)*0.01)*0.6;
-        if(f.y > h+5){ f.y = -10; f.x = Math.random()*w; }
-        ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2); ctx.fill();
+        f.y+=f.s; f.x += Math.sin((f.y+f.d)*0.01)*0.6;
+        if(f.y>h+5){ f.y=-10; f.x=Math.random()*w; }
+        ctx.beginPath(); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); ctx.fill();
       }
-      raf = requestAnimationFrame(step);
+      raf=requestAnimationFrame(step);
     }
-
-    function start(){ if(raf) return; setCanvasSize(); raf = requestAnimationFrame(step); }
-    function stop(){ if(raf){ cancelAnimationFrame(raf); raf = null; } }
+    function start(){ if(raf) return; setCanvasSize(); raf=requestAnimationFrame(step); }
+    function stop(){ if(raf){ cancelAnimationFrame(raf); raf=null; } }
     window.addEventListener('resize', setCanvasSize);
-    document.addEventListener('visibilitychange', () => { if(document.hidden) stop(); else start(); });
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden) stop(); else start(); });
     start();
   }
-
-  // Капча
-  const capQ = document.getElementById('capQ');
-  const capA = document.getElementById('capA');
-  const capR = document.getElementById('capR');
-  let capSum = 0;
-
-  function genCap(){
-    const a = Math.floor(2 + Math.random()*8);
-    const b = Math.floor(2 + Math.random()*8);
-    capSum = a + b;
-    capQ.textContent = `${a} + ${b} = ?`;
-    capA.value = '';
-  }
-  capR.addEventListener('click', genCap);
-  genCap();
-
-  // Локальная "отправка"
-  const form = document.getElementById('appForm');
-  const res = document.getElementById('result');
-  const resetBtn = document.getElementById('resetBtn');
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const nick = document.getElementById('nick').value.trim();
-    const title = document.getElementById('title').value.trim();
-    const vt = document.getElementById('vt').value.trim();
-    const link = document.getElementById('link').value.trim();
-
-    if(!nick || !title || !vt || !link){ alert('Заполните все поля.'); return; }
-    if(!/^https?:\/\//i.test(vt) || vt.indexOf('virustotal.com')===-1){ alert('Укажите корректную ссылку на VirusTotal.'); return; }
-    if(!/^https?:\/\//i.test(link)){ alert('Укажите корректную ссылку на скачивание.'); return; }
-    if(parseInt(capA.value,10) !== capSum){ alert('Неверная капча. Попробуйте ещё раз.'); genCap(); capA.focus(); return; }
-
-    const app = { id: 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
-                  nick, title, virustotal: vt, link, status: 'pending', ts: Date.now() };
-
-    try{
-      const db = JSON.parse(localStorage.getItem('fluxeApplications')) || [];
-      db.unshift(app);
-      localStorage.setItem('fluxeApplications', JSON.stringify(db));
-    }catch(e){
-      alert('Не удалось сохранить заявку. Проверьте настройки браузера.');
-      return;
-    }
-
-    res.style.display = 'block';
-    res.textContent = 'Заявка отправлена!'; // без ID и без текста про LocalStorage
-    form.reset();
-    genCap();
-  });
-
-  resetBtn.addEventListener('click', genCap);
 });
 </script>
 </body>
